@@ -27,23 +27,23 @@ namespace Beladeliste
             //max available payload of each vehicle 
             int[] payloads = new int[2] { 941900, 941900 };
 
-            //generate a loading-list for each vehicle
-            LoadingListItem[][] packingLists = Distribute(data, payloads);
-
             Console.WriteLine("All equipment:");
             Console.WriteLine("---------------------------------------------------");
             foreach (Equipment e in data)
             {
-                Console.WriteLine(e.name + "\t" + e.requiredQuantity + "\t" + e.weight + "\t" + e.value + "\t" + e.ValuePerWeightRatio);
+                Console.WriteLine(e.name + "\t" + e.requiredQuantity + "\t" + e.weight + "\t" + e.value );
             }
             Console.WriteLine();
             Console.WriteLine();
 
+            //generate a loading-list for each vehicle
+            PacklistItem[][] packingLists = Distribute(data, payloads);
 
+            
             //visualize results
             for (int i = 0; i < packingLists.Length; i++)
             {
-                LoadingListItem[] l = packingLists[i];
+                PacklistItem[] l = packingLists[i];
                 if (l == null)
                 {
                     Console.WriteLine("List missing!");
@@ -56,7 +56,7 @@ namespace Beladeliste
                 int numberOfPositions = l.Length;
                 for(int p = 0; p < numberOfPositions; p++)
                 {
-                    LoadingListItem pos = l[p];
+                    PacklistItem pos = l[p];
                     Console.WriteLine(pos.name + "\t" + pos.quantity + " Stk.");
                 }
 
@@ -69,30 +69,35 @@ namespace Beladeliste
         }
 
 
-        public static LoadingListItem[][] Distribute(Equipment[] data, int[] payloads)
+        public static PacklistItem[][] Distribute(Equipment[] data, int[] payloads)
         {
-            int availableWeight = payloads[0];
-            int index = 0;
-            data = data.OrderByDescending(Equipment => Equipment.ValuePerWeightRatio).ThenBy(Equipment => Equipment.weight).ToArray();
+            List<Equipment> sortedData = data.OrderByDescending(Equipment => Equipment.ValuePerWeightRatio).ThenBy(Equipment => Equipment.weight).ToList();
+            PacklistItem[][] result = new PacklistItem[payloads.Length][];
 
-            LoadingListItem[][] result = new LoadingListItem[payloads.Length][];
-            List<LoadingListItem> items = new List<LoadingListItem>();
+            int eqIndex = 0;
+            for (int i = 0; i < payloads.Length; i++)
+            {
+                int availableWeight = payloads[i];
 
-            HashSet<string> namesInOutput = new HashSet<string>();
-            Equipment e = data[index];
+                Equipment eq = sortedData[eqIndex];
+                int requiredQuantity = eq.requiredQuantity;
+                
+                List<PacklistItem> packList = new List<PacklistItem>();
+                
+                while()
 
-            
+                result[i] = packList.ToArray();
+            }
 
-            result[0] = items.ToArray();
             return result;
         }
 
-        public struct LoadingListItem
+        public struct PacklistItem
         {
             public string name { get; private set; }
             public int quantity { get; private set; }
 
-            public LoadingListItem(string name, int quantity)
+            public PacklistItem(string name, int quantity)
             {
                 this.name = name;
                 this.quantity = quantity;
