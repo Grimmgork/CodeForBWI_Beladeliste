@@ -1,0 +1,6 @@
+C:\Users\Eric\source\repos\Beladeliste\Beladeliste\bin\Debug\Beladeliste.exe.config
+C:\Users\Eric\source\repos\Beladeliste\Beladeliste\bin\Debug\Beladeliste.exe
+C:\Users\Eric\source\repos\Beladeliste\Beladeliste\bin\Debug\Beladeliste.pdb
+C:\Users\Eric\source\repos\Beladeliste\Beladeliste\obj\Debug\Beladeliste.exe
+C:\Users\Eric\source\repos\Beladeliste\Beladeliste\obj\Debug\Beladeliste.pdb
+C:\Users\Eric\source\repos\Beladeliste\Beladeliste\obj\Debug\Beladeliste.csprojAssemblyReference.cache
