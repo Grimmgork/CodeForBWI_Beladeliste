@@ -24,10 +24,16 @@ namespace Beladeliste
                 new Equipment("Tablet outdoor groß", 370, 1980, 68)
             };
 
+            //mapping the name of each position to a index
+            Dictionary<string, int> nameIndexMap = new Dictionary<string, int>();
+            for(int i = 0; i < data.Length;i++){
+                nameIndexMap.Add(data[i].name, i);
+            }
+
             //max available payload of each vehicle 
             int[] payloads = new int[2] { 941900, 941900 };
 
-            Console.WriteLine("All equipment:");
+            Console.WriteLine("All equipment for Bonn:");
             Console.WriteLine("---------------------------------------------------");
             foreach (Equipment e in data)
             {
@@ -39,6 +45,7 @@ namespace Beladeliste
             //generate a loading-list for each vehicle
             PacklistItem[][] packingLists = Distribute(data, payloads);
 
+            int valueCounter = 0;
             
             //visualize results
             for (int i = 0; i < packingLists.Length; i++)
@@ -50,19 +57,24 @@ namespace Beladeliste
                     continue;
                 }
                     
-                Console.WriteLine("Packing list " + (i + 1) + ":");
+                Console.WriteLine("Packing list for transport-" + (i + 1) + ":");
                 Console.WriteLine("----------------------------------------");
 
                 int numberOfPositions = l.Length;
                 for(int p = 0; p < numberOfPositions; p++)
                 {
                     PacklistItem pos = l[p];
+                    valueCounter += data[nameIndexMap[pos.name]].value * pos.quantity;
                     Console.WriteLine(pos.name + "\t" + pos.quantity + " Stk.");
                 }
 
                 Console.WriteLine();
                 Console.WriteLine();
             }
+
+            Console.WriteLine("Total value:" + "\n"+ valueCounter);
+            Console.ReadLine();
+            Console.ReadLine();
 
             Console.WriteLine("Press enter to close...");
             Console.ReadLine();
@@ -73,18 +85,31 @@ namespace Beladeliste
         {
             List<Equipment> sortedData = data.OrderByDescending(Equipment => Equipment.ValuePerWeightRatio).ThenBy(Equipment => Equipment.weight).ToList();
             PacklistItem[][] result = new PacklistItem[payloads.Length][];
+            Dictionary<string, int> quantities = new Dictionary<string, int>();
 
-            int eqIndex = 0;
             for (int i = 0; i < payloads.Length; i++)
             {
                 int availableWeight = payloads[i];
-
-                Equipment eq = sortedData[eqIndex];
-                int requiredQuantity = eq.requiredQuantity;
-                
                 List<PacklistItem> packList = new List<PacklistItem>();
                 
-                while()
+                for(int eqIndex = 0; eqIndex < sortedData.Count; eqIndex++)
+                {
+                    Equipment eq = sortedData[eqIndex];
+                    if (i == 0){ //build the quantity-dictionary on the first traversal of all positions
+                        quantities.Add(eq.name, eq.requiredQuantity);
+                    }
+
+                    int maxQuantity = availableWeight / eq.weight;
+
+                    if (maxQuantity == 0 || quantities[eq.name] == 0)
+                        continue;
+
+                    int quantity = Math.Min(eq.requiredQuantity, maxQuantity);
+
+                    packList.Add(new PacklistItem(eq.name, quantity));
+                    availableWeight -= quantity * eq.weight;
+                    quantities[eq.name] -= quantity;
+                }
 
                 result[i] = packList.ToArray();
             }
