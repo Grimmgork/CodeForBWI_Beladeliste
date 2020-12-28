@@ -11,30 +11,27 @@ namespace Beladeliste
         static void Main(string[] args)
         {
             //data
-            Equipment[] context = new Equipment[10] {
-                new Equipment("Notebook Büro 13", 205, 2451, 40),
-                new Equipment("Notebook Büro 14", 420, 2978, 35),
-                new Equipment("Notebook outdoor", 450, 3625, 80),
-                new Equipment("Mobiltelefon Büro", 60, 717, 30),
-                new Equipment("Mobiltelefon Outdoor", 157, 988, 60),
-                new Equipment("Mobiltelefon Heavy Duty", 220, 1220, 65),
-                new Equipment("Tablet Büro klein", 620, 20, 4),
-                new Equipment("Tablet Büro groß", 250, 15, 3),
-                new Equipment("Tablet outdoor klein", 540, 1690, 45),
-                new Equipment("Tablet outdoor groß", 370, 1980, 68)
-            };
 
-            //mapping the name of each position to a index (to sum up the value at the e)
-            Dictionary<string, int> nameIndexMap = new Dictionary<string, int>();
-            for(int i = 0; i < context.Length;i++){
-                nameIndexMap.Add(context[i].name, i);
-            }
+            EquipmentData data = new EquipmentData();
+            data.Add(new Equipment("Notebook Büro 13", 2451, 40));
+            data.Add(new Equipment("Notebook Büro 14", 2978, 35));
+            data.Add(new Equipment("Notebook outdoor", 3625, 80));
+            data.Add(new Equipment("Mobiltelefon Büro", 717, 30));
+            data.Add(new Equipment("Mobiltelefon Outdoor", 988, 60));
+            data.Add(new Equipment("Mobiltelefon Heavy Duty", 1220, 65));
+            data.Add(new Equipment("Tablet Büro klein", 20, 4));
+            data.Add(new Equipment("Tablet Büro groß", 15, 3));
+            data.Add(new Equipment("Tablet outdoor klein", 1690, 45));
+            data.Add(new Equipment("Tablet outdoor groß", 1980, 68));
+
+            Dictionary<string, int> quantitys = new Dictionary<string, int>();
+
 
             //max available payload of each vehicle 
             int[] payloads = new int[2] { 941900, 941900 };
 
             //generate a loading-list for each vehicle
-            Dictionary<string, int>[] packingLists = Distribute(context, payloads);
+            Dictionary<string, int>[] packingLists = Distribute(data, quantitys ,payloads);
 
             int valueCounter = 0;
             
@@ -56,7 +53,7 @@ namespace Beladeliste
                 foreach (string positionName in positionNames)
                 {
                     int quantity = packlist[positionName];
-                    valueCounter += context[nameIndexMap[positionName]].value * quantity;
+                    valueCounter += data.GetData(positionName).value * quantity;
                     Console.WriteLine(positionName + "\t" + quantity + " Stk.");
                 }
 
@@ -73,10 +70,16 @@ namespace Beladeliste
         }
 
 
-        public static Dictionary<string,int>[] Distribute(Equipment[] context, Dictionary<string, int> packlist, int[] payloads)
+        public static Dictionary<string,int>[] Distribute(EquipmentData context, Dictionary<string, int> quantitys, int[] payloads)
         {
-            List<Equipment> sorted = context.OrderByDescending(Equipment => Equipment.ValuePerWeightRatio).ThenBy(Equipment => Equipment.weight).ToList();
+            List<string> sorted = //context.OrderByDescending(eq => eq.ValuePerWeightRatio).ThenBy(eq => eq.weight).ToArray();
+            
+            
 
+            while(true)
+            {
+
+            }
 
             Dictionary<string, int>[] result = new Dictionary<string, int>[payloads.Length];
 
@@ -102,6 +105,45 @@ namespace Beladeliste
                 this.name = name;
                 this.weight = weight;
                 this.value = value;
+            }
+        }
+
+        public class EquipmentData
+        {
+            Dictionary<string, Data> data;
+
+            public EquipmentData()
+            {
+                data = new Dictionary<string, Data>();
+            }
+
+            public Equipment GetData(string name)
+            {
+                if (!data.ContainsKey(name))
+                    throw new Exception("name is not present in the database");
+
+                Data d = data[name];
+                return new Equipment(name, d.weight, d.value);
+            }
+
+            public void Add(Equipment eq)
+            {
+                if (data.ContainsKey(eq.name))
+                    throw new Exception("name is already present in the database");
+
+                data.Add(eq.name, new Data(eq.weight, eq.value));
+            }
+
+            struct Data
+            {
+                public int weight { get; private set; }
+                public int value { get; private set; }
+
+                public Data(int weight, int value)
+                {
+                    this.weight = weight;
+                    this.value = value;
+                }
             }
         }
     }
