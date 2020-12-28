@@ -53,7 +53,7 @@ namespace Beladeliste
                 foreach (string positionName in positionNames)
                 {
                     int quantity = packlist[positionName];
-                    valueCounter += data.GetData(positionName).value * quantity;
+                    valueCounter += data[positionName].value * quantity;
                     Console.WriteLine(positionName + "\t" + quantity + " Stk.");
                 }
 
@@ -72,14 +72,8 @@ namespace Beladeliste
 
         public static Dictionary<string,int>[] Distribute(EquipmentData context, Dictionary<string, int> quantitys, int[] payloads)
         {
-            List<string> sorted = //context.OrderByDescending(eq => eq.ValuePerWeightRatio).ThenBy(eq => eq.weight).ToArray();
-            
-            
-
-            while(true)
-            {
-
-            }
+            //order the names by its ValuePerWeight ratio and then by its weight
+            List<string> sorted = context.GetAllNames().OrderByDescending(name => context[name].ValuePerWeightRatio).ThenBy(name => context[name].weight).ToList();
 
             Dictionary<string, int>[] result = new Dictionary<string, int>[payloads.Length];
 
@@ -112,18 +106,26 @@ namespace Beladeliste
         {
             Dictionary<string, Data> data;
 
+            public Equipment this[string positonName]
+            {
+                get
+                {
+                    if (!data.ContainsKey(positonName))
+                        throw new Exception("name is not present in the database");
+
+                    Data d = data[positonName];
+                    return new Equipment(positonName, d.weight, d.value);
+                }
+            }
+
             public EquipmentData()
             {
                 data = new Dictionary<string, Data>();
             }
 
-            public Equipment GetData(string name)
+            public IEnumerable<string> GetAllNames()
             {
-                if (!data.ContainsKey(name))
-                    throw new Exception("name is not present in the database");
-
-                Data d = data[name];
-                return new Equipment(name, d.weight, d.value);
+                return data.Keys;
             }
 
             public void Add(Equipment eq)
