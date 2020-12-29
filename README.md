@@ -11,3 +11,7 @@ Der Algorithmus:
 3. Findet sich keine Position, die Platz findet, so wird beim nächsten Transporter wieder bei Punkt 1. angefangen.
 4. Der Prozess endet, wenn alle Positionen verladen sind oder Keine Positionen mehr dem letzten Transporter zugeladen werden können.
 
+Der Algorithmus ist in der Methode "Distribute" in der Programm.cs Klasse implementiert.
+
+
+

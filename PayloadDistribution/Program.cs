@@ -36,7 +36,6 @@ namespace PayloadDistribution
             packlistBonn.Add("Tablet outdoor klein", 540);
             packlistBonn.Add("Tablet outdoor groß", 370);
 
-            
             int payloadSize = 941900; 
             Dictionary<string, int>[] packlists = Distribute(data, packlistBonn, payloadSize, 2); //compute the packlists
 
@@ -126,14 +125,14 @@ namespace PayloadDistribution
                     }
                 }
 
-                //add a position to the packlist
+                //add the position to the result packlist
                 result[payloadIndex].Add(currentPosition.name, quantity);
 
-                //update the requiredQuantity and the availablePayload
+                //update the required quantity and the availablePayload
                 availablePayload -= quantity * currentPosition.weight;
                 packlist[currentPosition.name] -= quantity;
 
-                //if full amount of the current equipment could be loadet 
+                //if the full amount of the current equipment could be loadet
                 if (packlist[currentPosition.name] == 0)
                 {
                     //remove the position
@@ -142,7 +141,7 @@ namespace PayloadDistribution
                     if (positionNames.Count == 0)
                         break;
                         
-                    //go to position with next lower ValuePerWeightRatio
+                    //go to position with next lower ValuePerWeightRatio 
                     positionIndex--;
                     currentPosition = equipmentData[positionNames[positionIndex]];
                 }
