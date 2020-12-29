@@ -73,13 +73,11 @@ namespace PayloadDistribution
             }
 
             Console.WriteLine("total value:" + "\n" + valueCounter);
-            Console.ReadLine();
-            Console.ReadLine();
+
+            #endregion  
 
             Console.WriteLine("Press enter to close...");
             Console.ReadLine();
-
-            #endregion  
         }
 
 
