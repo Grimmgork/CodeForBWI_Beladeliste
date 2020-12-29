@@ -11,7 +11,7 @@ namespace PayloadDistribution
         static void Main(string[] args)
         {
             //describe the equipment
-            EquipmentDatabase data = new EquipmentDatabase();
+            EquipmentData data = new EquipmentData();
             data.Add(new Equipment("Notebook Büro 13", 2451, 40));
             data.Add(new Equipment("Notebook Büro 14", 2978, 35));
             data.Add(new Equipment("Notebook outdoor", 3625, 80));
@@ -36,11 +36,9 @@ namespace PayloadDistribution
             packlistBonn.Add("Tablet outdoor klein", 540);
             packlistBonn.Add("Tablet outdoor groß", 370);
 
-            //available payload for each vehicle in gramm
-            int[] payloads = new int[2] { 941900, 941900 };
-
-            //compute the packlists
-            Dictionary<string, int>[] packlists = Distribute(data, packlistBonn, payloads);
+            
+            int payloadSize = 941900; 
+            Dictionary<string, int>[] packlists = Distribute(data, packlistBonn, payloadSize, 2); //compute the packlists
 
             #region print the packlists
 
@@ -67,7 +65,7 @@ namespace PayloadDistribution
                     Console.WriteLine("~ " + positionName.PadRight(28, ' ') + quantity.ToString().PadLeft(5,' ') + " Stk.");
                 }
                 Console.WriteLine("----------------------------------------");
-                Console.WriteLine("total payload used: " + weightCounter + "g/" + payloads[i] + "g");
+                Console.WriteLine("total payload used: " + weightCounter + "g/" + payloadSize + "g");
                 Console.WriteLine();
                 Console.WriteLine();
             }
@@ -81,72 +79,78 @@ namespace PayloadDistribution
         }
 
 
-        public static Dictionary<string,int>[] Distribute(EquipmentDatabase equipmentData, Dictionary<string, int> packlist, int[] payloads)
+        public static Dictionary<string,int>[] Distribute(EquipmentData equipmentData, Dictionary<string, int> packlist, int payloadSize, int numberOfPayloads)
         {
-            //sort the positions of the packlist by its equipments ValuePerWeight ratio and weight
-            List<string> sortedNames = packlist.Keys
-                                       .OrderBy(name => equipmentData[name].ValuePerWeightRatio)
-                                       .ThenByDescending(name => equipmentData[name].weight)
-                                       .ToList();
+            //sort the positions of the packlist by its ValuePerWeightRatio and weight
+            List<string> positionNames = packlist.Keys
+                                        .OrderBy(name => equipmentData[name].ValuePerWeightRatio)
+                                        .ThenByDescending(name => equipmentData[name].weight)
+                                        .ToList();
 
-            Dictionary<string, int>[] result = new Dictionary<string, int>[payloads.Length];
+            Dictionary<string, int>[] result = new Dictionary<string, int>[numberOfPayloads];
 
             int payloadIndex = 0;
-            int index = sortedNames.Count - 1;
-            int availablePayload = payloads[payloadIndex];
-            Equipment currentEquipment = equipmentData[sortedNames[index]];
+            int availablePayload = payloadSize;
+            int positionIndex = positionNames.Count - 1;
+            Equipment currentPosition = equipmentData[positionNames[positionIndex]];
+
             result[payloadIndex] = new Dictionary<string, int>();
 
             while (true)
             {
                 //compute the maximum quantity wich could now fit inside the container
-                int quantity = Math.Min(availablePayload / currentEquipment.weight, packlist[currentEquipment.name]); 
+                int quantity = Math.Min(availablePayload / currentPosition.weight, packlist[currentPosition.name]); 
                 if (quantity == 0) //if the equipment does not fit at least once 
                 {
-                    if (index > 0)
+                    if (positionIndex > 0)
                     {
-                        //go to equipment with next lower ValuePerWeightRatio
-                        index--;
-                        currentEquipment = equipmentData[sortedNames[index]];
+                        //go to position with next lower ValuePerWeightRatio
+                        positionIndex--;
+                        currentPosition = equipmentData[positionNames[positionIndex]];
                         continue;
                     }
                     else
                     {
                         payloadIndex++;
-                        if (payloadIndex >= payloads.Length)
+                        if (payloadIndex >= numberOfPayloads)
                             break; //end the algorithm if there is no container left
 
                         //go to next container
                         result[payloadIndex] = new Dictionary<string, int>();
-                        availablePayload = payloads[payloadIndex];
+                        availablePayload = payloadSize;
 
-                        //go to equipment with the largest ValuePerWeight ratio (last element of sortedNames)
-                        index = sortedNames.Count - 1;
-                        currentEquipment = equipmentData[sortedNames[index]];
+                        //go to position with the largest ValuePerWeightRatio (last element of sortedNames)
+                        positionIndex = positionNames.Count - 1;
+                        currentPosition = equipmentData[positionNames[positionIndex]];
                         continue;
                     }
                 }
 
-                //add the equipment to the resulting packlist
-                result[payloadIndex].Add(currentEquipment.name, quantity);
+                //add a position to the packlist
+                result[payloadIndex].Add(currentPosition.name, quantity);
 
                 //update the requiredQuantity and the availablePayload
-                availablePayload -= quantity * currentEquipment.weight;
-                packlist[currentEquipment.name] -= quantity;
+                availablePayload -= quantity * currentPosition.weight;
+                packlist[currentPosition.name] -= quantity;
 
                 //if full amount of the current equipment could be loadet 
-                if (packlist[currentEquipment.name] == 0)
+                if (packlist[currentPosition.name] == 0)
                 {
-                    sortedNames.RemoveAt(index);
-                    //end the algorithm if there is no equipment position left
-                    if (sortedNames.Count == 0)
+                    //remove the position
+                    positionNames.RemoveAt(positionIndex);
+                    //end the algorithm if there is no other position left
+                    if (positionNames.Count == 0)
                         break;
-
-                    //go to equipment with next lower ValuePerWeightRatio
-                    index--;
-                    currentEquipment = equipmentData[sortedNames[index]];
+                        
+                    //go to position with next lower ValuePerWeightRatio
+                    positionIndex--;
+                    currentPosition = equipmentData[positionNames[positionIndex]];
                 }
             }
+
+            //init empty packlists for the unused containers
+            for (int i = payloadIndex + 1; i < result.Length; i++)
+                result[i] = new Dictionary<string, int>();
 
             return result;
         }

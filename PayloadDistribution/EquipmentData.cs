@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PayloadDistribution
 {
-    public class EquipmentDatabase
+    public class EquipmentData
     {
         /// <summary>
         /// holds the data to describe each equipment. It behaves like a dictionary: returns the data when providet with the name of the equipment in O(1) time.
@@ -25,7 +25,7 @@ namespace PayloadDistribution
 
         private Dictionary<string, Data> data;
 
-        public EquipmentDatabase()
+        public EquipmentData()
         {
             data = new Dictionary<string, Data>();
         }
