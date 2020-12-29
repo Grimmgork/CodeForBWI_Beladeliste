@@ -9,8 +9,8 @@ namespace PayloadDistribution
     public class EquipmentData
     {
         /// <summary>
-        /// holds the data to describe each equipment. It behaves like a dictionary: returns the data when providet with the name of the equipment.
-        /// It implements the array accessor -> []
+        /// holds the data to describe each equipment. It behaves like a dictionary: returns the data when providet with the name of the equipment in O(1) time.
+        /// It implements the [] accessor
         /// </summary>
         /// 
 
@@ -18,9 +18,6 @@ namespace PayloadDistribution
         {
             get
             {
-                if (!data.ContainsKey(positonName))
-                    throw new Exception("name is not present in the database");
-
                 Data d = data[positonName];
                 return new Equipment(positonName, d.weight, d.value);
             }
@@ -35,9 +32,6 @@ namespace PayloadDistribution
 
         public void Add(Equipment eq)
         {
-            if (data.ContainsKey(eq.name))
-                throw new Exception("name is already present in the database");
-
             data.Add(eq.name, new Data(eq.weight, eq.value));
         }
 
@@ -51,33 +45,6 @@ namespace PayloadDistribution
                 this.weight = weight;
                 this.value = value;
             }
-        }
-    }
-
-    public struct Equipment
-    {
-        /// <summary>
-        /// describes a equipment
-        /// </summary>
-        /// 
-
-        public string name { get; private set; }
-        public int weight { get; private set; }
-        public int value { get; private set; }
-
-        public float ValuePerWeightRatio
-        {
-            get
-            {
-                return (float)value / (float)weight;
-            }
-        }
-
-        public Equipment(string name, int weight, int value)
-        {
-            this.name = name;
-            this.weight = weight;
-            this.value = value;
         }
     }
 }

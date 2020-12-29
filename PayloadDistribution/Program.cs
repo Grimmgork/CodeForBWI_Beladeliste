@@ -23,7 +23,7 @@ namespace PayloadDistribution
             data.Add(new Equipment("Tablet outdoor klein", 1690, 45));
             data.Add(new Equipment("Tablet outdoor groß", 1980, 68));
 
-            //create the packlist for Bonn
+            //the packlist for Bonn
             Dictionary<string, int> packlistBonn = new Dictionary<string, int>();
             packlistBonn.Add("Notebook Büro 13", 205);
             packlistBonn.Add("Notebook Büro 14", 420);
@@ -36,7 +36,7 @@ namespace PayloadDistribution
             packlistBonn.Add("Tablet outdoor klein", 540);
             packlistBonn.Add("Tablet outdoor groß", 370);
 
-            //max available payload of each vehicle in gramm (1100kg - weight of drivers)
+            //available payload of each vehicle in gramm
             int[] payloads = new int[2] { 941900, 941900 };
 
             //compute the packlists for the transports
@@ -82,24 +82,28 @@ namespace PayloadDistribution
             #endregion  
         }
 
-        public static Dictionary<string,int>[] Distribute(EquipmentData equipmentData, Dictionary<string, int> requiredQuantities, int[] payloads)
+
+        public static Dictionary<string,int>[] Distribute(EquipmentData equipmentData, Dictionary<string, int> packlist, int[] payloads)
         {
-            //order the Equipment-Names by its ValuePerWeight ratio. If the ratios are the same sort them by the weight
-            List<string> sortedNames = requiredQuantities.Keys.OrderBy(name => equipmentData[name].ValuePerWeightRatio).ThenByDescending(name => equipmentData[name].weight).ToList();
+            //sort the positions of the packlist by its equipments ValuePerWeight ratio and weight
+            List<string> sortedNames = packlist.Keys
+                                       .OrderBy(name => equipmentData[name].ValuePerWeightRatio)
+                                       .ThenByDescending(name => equipmentData[name].weight)
+                                       .ToList();
 
             Dictionary<string, int>[] result = new Dictionary<string, int>[payloads.Length];
 
             int payloadIndex = 0;
             int index = sortedNames.Count - 1;
             int availablePayload = payloads[payloadIndex];
-            result[payloadIndex] = new Dictionary<string, int>();
             Equipment currentEquipment = equipmentData[sortedNames[index]];
+            result[payloadIndex] = new Dictionary<string, int>();
 
             while (true)
             {
-                //compute the maximum quantity wich could fit inside the container
-                int quantity = Math.Min(availablePayload / currentEquipment.weight, requiredQuantities[currentEquipment.name]); 
-                if (quantity == 0) //if the equipment does not fit at least once in the container
+                //compute the maximum quantity wich could now fit inside the container
+                int quantity = Math.Min(availablePayload / currentEquipment.weight, packlist[currentEquipment.name]); 
+                if (quantity == 0) //if the equipment does not fit at least once 
                 {
                     if (index > 0)
                     {
@@ -130,13 +134,12 @@ namespace PayloadDistribution
 
                 //update the requiredQuantity and the availablePayload
                 availablePayload -= quantity * currentEquipment.weight;
-                requiredQuantities[currentEquipment.name] -= quantity;
+                packlist[currentEquipment.name] -= quantity;
 
                 //if all of the current equipment could be loadet 
-                if (requiredQuantities[currentEquipment.name] == 0)
+                if (packlist[currentEquipment.name] == 0)
                 {
-                    //remove the equipment from the requiredQuantities table and sortedNames (so the list can be searched faster)
-                    requiredQuantities.Remove(currentEquipment.name);
+                    //remove the equipment from the sortedNames to speed up searches of the array
                     sortedNames.RemoveAt(index);
 
                     //go to equipment with next lower ValuePerWeightRatio
@@ -144,7 +147,7 @@ namespace PayloadDistribution
                     currentEquipment = equipmentData[sortedNames[index]];
 
                     //end the algorithm if there is no equipment position left
-                    if (requiredQuantities.Count == 0)
+                    if (sortedNames.Count == 0)
                         break;
                 }
             }
