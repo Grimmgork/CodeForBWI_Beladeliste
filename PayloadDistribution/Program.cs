@@ -11,7 +11,7 @@ namespace PayloadDistribution
         static void Main(string[] args)
         {
             //describe the equipment
-            EquipmentData data = new EquipmentData();
+            EquipmentDatabase data = new EquipmentDatabase();
             data.Add(new Equipment("Notebook Büro 13", 2451, 40));
             data.Add(new Equipment("Notebook Büro 14", 2978, 35));
             data.Add(new Equipment("Notebook outdoor", 3625, 80));
@@ -23,7 +23,7 @@ namespace PayloadDistribution
             data.Add(new Equipment("Tablet outdoor klein", 1690, 45));
             data.Add(new Equipment("Tablet outdoor groß", 1980, 68));
 
-            //the packlist for Bonn
+            //the complete packlist for the facility in Bonn
             Dictionary<string, int> packlistBonn = new Dictionary<string, int>();
             packlistBonn.Add("Notebook Büro 13", 205);
             packlistBonn.Add("Notebook Büro 14", 420);
@@ -36,10 +36,10 @@ namespace PayloadDistribution
             packlistBonn.Add("Tablet outdoor klein", 540);
             packlistBonn.Add("Tablet outdoor groß", 370);
 
-            //available payload of each vehicle in gramm
+            //available payload for each vehicle in gramm
             int[] payloads = new int[2] { 941900, 941900 };
 
-            //compute the packlists for the transports
+            //compute the packlists
             Dictionary<string, int>[] packlists = Distribute(data, packlistBonn, payloads);
 
             #region print the packlists
@@ -55,7 +55,7 @@ namespace PayloadDistribution
                     continue;
                 }
                     
-                Console.WriteLine("packlist for payload-" + (i + 1) + ":");
+                Console.WriteLine("packlist for vehicle " + (i + 1) + ":");
                 Console.WriteLine("----------------------------------------");
 
                 List<string> positionNames = packlist.Keys.ToList();
@@ -64,10 +64,10 @@ namespace PayloadDistribution
                     int quantity = packlist[positionName];
                     valueCounter += data[positionName].value * quantity;
                     weightCounter += data[positionName].weight * quantity;
-                    Console.WriteLine("~ " + positionName.PadRight(30, ' ') + quantity + " Stk.");
+                    Console.WriteLine("~ " + positionName.PadRight(28, ' ') + quantity.ToString().PadLeft(5,' ') + " Stk.");
                 }
                 Console.WriteLine("----------------------------------------");
-                Console.WriteLine("payload used: " + weightCounter + "g/" + payloads[i] + "g");
+                Console.WriteLine("total payload used: " + weightCounter + "g/" + payloads[i] + "g");
                 Console.WriteLine();
                 Console.WriteLine();
             }
@@ -83,7 +83,7 @@ namespace PayloadDistribution
         }
 
 
-        public static Dictionary<string,int>[] Distribute(EquipmentData equipmentData, Dictionary<string, int> packlist, int[] payloads)
+        public static Dictionary<string,int>[] Distribute(EquipmentDatabase equipmentData, Dictionary<string, int> packlist, int[] payloads)
         {
             //sort the positions of the packlist by its equipments ValuePerWeight ratio and weight
             List<string> sortedNames = packlist.Keys
@@ -136,19 +136,17 @@ namespace PayloadDistribution
                 availablePayload -= quantity * currentEquipment.weight;
                 packlist[currentEquipment.name] -= quantity;
 
-                //if all of the current equipment could be loadet 
+                //if full amount of the current equipment could be loadet 
                 if (packlist[currentEquipment.name] == 0)
                 {
-                    //remove the equipment from the sortedNames to speed up searches of the array
                     sortedNames.RemoveAt(index);
+                    //end the algorithm if there is no equipment position left
+                    if (sortedNames.Count == 0)
+                        break;
 
                     //go to equipment with next lower ValuePerWeightRatio
                     index--;
                     currentEquipment = equipmentData[sortedNames[index]];
-
-                    //end the algorithm if there is no equipment position left
-                    if (sortedNames.Count == 0)
-                        break;
                 }
             }
 
