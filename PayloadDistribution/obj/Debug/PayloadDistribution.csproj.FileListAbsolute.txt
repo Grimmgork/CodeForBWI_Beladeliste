@@ -1,0 +1,12 @@
+C:\Users\Eric\source\repos\CodeForBWI_Beladeliste\Beladeliste\bin\Debug\Beladeliste.exe.config
+C:\Users\Eric\source\repos\CodeForBWI_Beladeliste\Beladeliste\bin\Debug\Beladeliste.exe
+C:\Users\Eric\source\repos\CodeForBWI_Beladeliste\Beladeliste\bin\Debug\Beladeliste.pdb
+C:\Users\Eric\source\repos\CodeForBWI_Beladeliste\Beladeliste\obj\Debug\PayloadDistribution.csprojAssemblyReference.cache
+C:\Users\Eric\source\repos\CodeForBWI_Beladeliste\Beladeliste\obj\Debug\Beladeliste.exe
+C:\Users\Eric\source\repos\CodeForBWI_Beladeliste\Beladeliste\obj\Debug\Beladeliste.pdb
+C:\Users\Eric\source\repos\PayloadDistribution_CodeForBWI\PayloadDistribution\bin\Debug\Beladeliste.exe.config
+C:\Users\Eric\source\repos\PayloadDistribution_CodeForBWI\PayloadDistribution\bin\Debug\Beladeliste.exe
+C:\Users\Eric\source\repos\PayloadDistribution_CodeForBWI\PayloadDistribution\bin\Debug\Beladeliste.pdb
+C:\Users\Eric\source\repos\PayloadDistribution_CodeForBWI\PayloadDistribution\obj\Debug\PayloadDistribution.csprojAssemblyReference.cache
+C:\Users\Eric\source\repos\PayloadDistribution_CodeForBWI\PayloadDistribution\obj\Debug\Beladeliste.exe
+C:\Users\Eric\source\repos\PayloadDistribution_CodeForBWI\PayloadDistribution\obj\Debug\Beladeliste.pdb
