@@ -4,14 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Beladeliste
+namespace PayloadDistribution
 {
     class Program
     {
         static void Main(string[] args)
         {
-            //data
-
+            //describe the equipment
             EquipmentData data = new EquipmentData();
             data.Add(new Equipment("Notebook Büro 13", 2451, 40));
             data.Add(new Equipment("Notebook Büro 14", 2978, 35));
@@ -19,134 +18,138 @@ namespace Beladeliste
             data.Add(new Equipment("Mobiltelefon Büro", 717, 30));
             data.Add(new Equipment("Mobiltelefon Outdoor", 988, 60));
             data.Add(new Equipment("Mobiltelefon Heavy Duty", 1220, 65));
-            data.Add(new Equipment("Tablet Büro klein", 20, 4));
-            data.Add(new Equipment("Tablet Büro groß", 15, 3));
+            data.Add(new Equipment("Tablet Büro klein", 1405, 40));
+            data.Add(new Equipment("Tablet Büro groß", 1455, 40));
             data.Add(new Equipment("Tablet outdoor klein", 1690, 45));
             data.Add(new Equipment("Tablet outdoor groß", 1980, 68));
 
-            Dictionary<string, int> quantitys = new Dictionary<string, int>();
+            //create the packlist for Bonn
+            Dictionary<string, int> packlistBonn = new Dictionary<string, int>();
+            packlistBonn.Add("Notebook Büro 13", 205);
+            packlistBonn.Add("Notebook Büro 14", 420);
+            packlistBonn.Add("Notebook outdoor", 450);
+            packlistBonn.Add("Mobiltelefon Büro", 60);
+            packlistBonn.Add("Mobiltelefon Outdoor", 157);
+            packlistBonn.Add("Mobiltelefon Heavy Duty", 220);
+            packlistBonn.Add("Tablet Büro klein", 620);
+            packlistBonn.Add("Tablet Büro groß", 250);
+            packlistBonn.Add("Tablet outdoor klein", 540);
+            packlistBonn.Add("Tablet outdoor groß", 370);
 
-
-            //max available payload of each vehicle 
+            //max available payload of each vehicle in gramm (1100kg - weight of drivers)
             int[] payloads = new int[2] { 941900, 941900 };
 
-            //generate a loading-list for each vehicle
-            Dictionary<string, int>[] packingLists = Distribute(data, quantitys ,payloads);
+            //compute the packlists for the transports
+            Dictionary<string, int>[] packlists = Distribute(data, packlistBonn, payloads);
+
+            #region print the packlists
 
             int valueCounter = 0;
-            
-            //visualize results
-            for (int i = 0; i < packingLists.Length; i++)
+            for (int i = 0; i < packlists.Length; i++)
             {
-                Dictionary<string, int> packlist = packingLists[i];
+                int weightCounter = 0;
+                Dictionary<string, int> packlist = packlists[i];
                 if (packlist == null)
                 {
-                    Console.WriteLine("List missing!");
+                    Console.WriteLine("list missing!");
                     continue;
                 }
                     
-                Console.WriteLine("Packing list for transport-" + (i + 1) + ":");
+                Console.WriteLine("packlist for payload-" + (i + 1) + ":");
                 Console.WriteLine("----------------------------------------");
 
                 List<string> positionNames = packlist.Keys.ToList();
-                positionNames.Sort();
                 foreach (string positionName in positionNames)
                 {
                     int quantity = packlist[positionName];
                     valueCounter += data[positionName].value * quantity;
-                    Console.WriteLine(positionName + "\t" + quantity + " Stk.");
+                    weightCounter += data[positionName].weight * quantity;
+                    Console.WriteLine("~ " + positionName.PadRight(30, ' ') + quantity + " Stk.");
                 }
-
+                Console.WriteLine("----------------------------------------");
+                Console.WriteLine("payload used: " + weightCounter + "g/" + payloads[i] + "g");
                 Console.WriteLine();
                 Console.WriteLine();
             }
 
-            Console.WriteLine("Total value:" + "\n"+ valueCounter);
+            Console.WriteLine("total value:" + "\n" + valueCounter);
             Console.ReadLine();
             Console.ReadLine();
 
             Console.WriteLine("Press enter to close...");
             Console.ReadLine();
+
+            #endregion  
         }
 
-
-        public static Dictionary<string,int>[] Distribute(EquipmentData context, Dictionary<string, int> quantitys, int[] payloads)
+        public static Dictionary<string,int>[] Distribute(EquipmentData equipmentData, Dictionary<string, int> requiredQuantities, int[] payloads)
         {
-            //order the names by its ValuePerWeight ratio and then by its weight
-            List<string> sorted = context.GetAllNames().OrderByDescending(name => context[name].ValuePerWeightRatio).ThenBy(name => context[name].weight).ToList();
+            //order the Equipment-Names by its ValuePerWeight ratio. If the ratios are the same sort them by the weight
+            List<string> sortedNames = requiredQuantities.Keys.OrderBy(name => equipmentData[name].ValuePerWeightRatio).ThenByDescending(name => equipmentData[name].weight).ToList();
 
             Dictionary<string, int>[] result = new Dictionary<string, int>[payloads.Length];
 
+            int payloadIndex = 0;
+            int index = sortedNames.Count - 1;
+            int availablePayload = payloads[payloadIndex];
+            result[payloadIndex] = new Dictionary<string, int>();
+            Equipment currentEquipment = equipmentData[sortedNames[index]];
+
+            while (true)
+            {
+                //compute the maximum quantity wich could fit inside the container
+                int quantity = Math.Min(availablePayload / currentEquipment.weight, requiredQuantities[currentEquipment.name]); 
+                if (quantity == 0) //if the equipment does not fit at least once in the container
+                {
+                    if (index > 0)
+                    {
+                        //go to equipment with next lower ValuePerWeightRatio
+                        index--;
+                        currentEquipment = equipmentData[sortedNames[index]];
+                        continue;
+                    }
+                    else
+                    {
+                        payloadIndex++;
+                        if (payloadIndex >= payloads.Length)
+                            break; //end the algorithm if there is no container left
+
+                        //go to next container
+                        result[payloadIndex] = new Dictionary<string, int>();
+                        availablePayload = payloads[payloadIndex];
+
+                        //go to equipment with the largest ValuePerWeight ratio (last element of sortedNames)
+                        index = sortedNames.Count - 1;
+                        currentEquipment = equipmentData[sortedNames[index]];
+                        continue;
+                    }
+                }
+
+                //add the equipment to the resulting packlist
+                result[payloadIndex].Add(currentEquipment.name, quantity);
+
+                //update the requiredQuantity and the availablePayload
+                availablePayload -= quantity * currentEquipment.weight;
+                requiredQuantities[currentEquipment.name] -= quantity;
+
+                //if all of the current equipment could be loadet 
+                if (requiredQuantities[currentEquipment.name] == 0)
+                {
+                    //remove the equipment from the requiredQuantities table and sortedNames (so the list can be searched faster)
+                    requiredQuantities.Remove(currentEquipment.name);
+                    sortedNames.RemoveAt(index);
+
+                    //go to equipment with next lower ValuePerWeightRatio
+                    index--;
+                    currentEquipment = equipmentData[sortedNames[index]];
+
+                    //end the algorithm if there is no equipment position left
+                    if (requiredQuantities.Count == 0)
+                        break;
+                }
+            }
+
             return result;
-        }
-
-        public struct Equipment
-        {
-            public string name { get; private set; }
-            public int weight { get; private set; }
-            public int value { get; private set; }
-
-            public float ValuePerWeightRatio
-            {
-                get
-                {
-                    return (float)value / (float)weight;
-                }
-            }
-
-            public Equipment(string name, int weight, int value)
-            {
-                this.name = name;
-                this.weight = weight;
-                this.value = value;
-            }
-        }
-
-        public class EquipmentData
-        {
-            Dictionary<string, Data> data;
-
-            public Equipment this[string positonName]
-            {
-                get
-                {
-                    if (!data.ContainsKey(positonName))
-                        throw new Exception("name is not present in the database");
-
-                    Data d = data[positonName];
-                    return new Equipment(positonName, d.weight, d.value);
-                }
-            }
-
-            public EquipmentData()
-            {
-                data = new Dictionary<string, Data>();
-            }
-
-            public IEnumerable<string> GetAllNames()
-            {
-                return data.Keys;
-            }
-
-            public void Add(Equipment eq)
-            {
-                if (data.ContainsKey(eq.name))
-                    throw new Exception("name is already present in the database");
-
-                data.Add(eq.name, new Data(eq.weight, eq.value));
-            }
-
-            struct Data
-            {
-                public int weight { get; private set; }
-                public int value { get; private set; }
-
-                public Data(int weight, int value)
-                {
-                    this.weight = weight;
-                    this.value = value;
-                }
-            }
         }
     }
 }

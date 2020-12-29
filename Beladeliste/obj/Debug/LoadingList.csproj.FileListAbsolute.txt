@@ -1,0 +1,6 @@
+C:\Users\Eric\source\repos\CodeForBWI_Beladeliste\Beladeliste\bin\Debug\Beladeliste.exe.config
+C:\Users\Eric\source\repos\CodeForBWI_Beladeliste\Beladeliste\bin\Debug\Beladeliste.exe
+C:\Users\Eric\source\repos\CodeForBWI_Beladeliste\Beladeliste\bin\Debug\Beladeliste.pdb
+C:\Users\Eric\source\repos\CodeForBWI_Beladeliste\Beladeliste\obj\Debug\LoadingList.csprojAssemblyReference.cache
+C:\Users\Eric\source\repos\CodeForBWI_Beladeliste\Beladeliste\obj\Debug\Beladeliste.exe
+C:\Users\Eric\source\repos\CodeForBWI_Beladeliste\Beladeliste\obj\Debug\Beladeliste.pdb
