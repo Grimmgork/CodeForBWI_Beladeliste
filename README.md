@@ -1,6 +1,8 @@
 # PayloadDistribution_CodeForBWI
 
-Das Projekt ist eine einfache c# .NET Konsolenanwendung, die beim Ausführen die geforderten Beladelisten für das Szenario errechnet und anzeigt.
+Das Projekt ist eine einfache c# .NET Konsolenanwendung für Windows, die beim Ausführen die geforderten Beladelisten für das Szenario errechnet und anzeigt.
+Diese Ordnerstruktur stellt ein VisualStudio Projekt dar.
+Die fertige Applikation als .exe befindet sich hier: ~\PayloadDistribution_CodeForBWI\PayloadDistribution\bin\Beladeliste.exe
 
 Der Algorithmus:
 1. Es wird nach einer Position gesucht, die mindestens einmal auf dem Transporter Platz findet, und dabei das höchstmögliche Wert/Gewicht Verhältnis besitzt.
